@@ -1,0 +1,1106 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <title>Whimsical Pantry & Recipe Cooker</title>
+  
+  <!-- Google Fonts: Fredoka & Nunito for playful whimsical feel -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+  
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+  
+  <!-- Canvas Confetti for Celebration -->
+  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+
+  <!-- Tesseract.js for Client-Side Receipt OCR -->
+  <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
+
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            display: ['"Fredoka"', 'cursive', 'sans-serif'],
+            body: ['"Nunito"', 'sans-serif'],
+          },
+          colors: {
+            pantry: {
+              cream: '#FBF8F1',
+              soft: '#F5EFE0',
+              wood: '#C89666',
+              woodDark: '#8B5A2B',
+              woodLight: '#E8D3B9',
+              sage: '#5F8D76',
+              sageLight: '#E8F1EC',
+              terracotta: '#E07250',
+              terracottaLight: '#FBECE7',
+              honey: '#F4A261',
+              honeyLight: '#FEF3E8',
+              berry: '#C35375',
+              butter: '#F9DF74',
+            }
+          },
+          boxShadow: {
+            'whimsy': '0 8px 0 rgba(139, 90, 43, 0.15)',
+            'whimsy-sm': '0 4px 0 rgba(139, 90, 43, 0.12)',
+            'whimsy-btn': '0 4px 0 #8B5A2B',
+            'whimsy-btn-active': '0 0px 0 #8B5A2B',
+            'shelf': '0 12px 16px -4px rgba(139, 90, 43, 0.25), 0 4px 6px -2px rgba(139, 90, 43, 0.15)',
+          }
+        }
+      }
+    }
+  </script>
+
+  <style>
+    /* Whimsical custom animations and styling */
+    * {
+      -webkit-tap-highlight-color: transparent;
+      user-select: none;
+    }
+    input, textarea {
+      user-select: text;
+    }
+    
+    body {
+      background-color: #F7F3E9;
+      background-image: 
+        radial-gradient(#E8DFD0 1.5px, transparent 1.5px),
+        radial-gradient(#E8DFD0 1.5px, #F7F3E9 1.5px);
+      background-size: 24px 24px;
+      background-position: 0 0, 12px 12px;
+      font-family: 'Nunito', sans-serif;
+      touch-action: manipulation;
+    }
+
+    /* Illustrated Wooden Shelf Effect */
+    .wooden-shelf {
+      position: relative;
+      background: linear-gradient(180deg, #E6C59E 0%, #D8AF80 50%, #C49867 100%);
+      border-radius: 12px;
+      border: 3px solid #8B5A2B;
+      box-shadow: 0 8px 12px rgba(100, 50, 15, 0.2), inset 0 2px 0 rgba(255, 255, 255, 0.4);
+    }
+    .wooden-shelf::after {
+      content: '';
+      position: absolute;
+      bottom: -10px;
+      left: 10px;
+      right: 10px;
+      height: 10px;
+      background: #77461A;
+      border-radius: 0 0 8px 8px;
+      opacity: 0.65;
+    }
+
+    /* Mason Jar Card Style */
+    .mason-jar {
+      position: relative;
+      background: #FFFFFF;
+      border: 2.5px solid #8B5A2B;
+      border-radius: 18px;
+      box-shadow: 0 6px 0 rgba(139, 90, 43, 0.18);
+      transition: all 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+    .mason-jar:hover {
+      transform: translateY(-3px) scale(1.02);
+      box-shadow: 0 9px 0 rgba(139, 90, 43, 0.18);
+    }
+    .mason-jar:active {
+      transform: translateY(2px) scale(0.99);
+      box-shadow: 0 2px 0 rgba(139, 90, 43, 0.18);
+    }
+
+    /* Cute Cork Top for Jars */
+    .mason-jar::before {
+      content: '';
+      position: absolute;
+      top: -6px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 42px;
+      height: 6px;
+      background: #D9A066;
+      border: 2px solid #8B5A2B;
+      border-radius: 4px 4px 2px 2px;
+    }
+
+    /* Button press animations */
+    .pressable {
+      transition: all 0.12s ease;
+      cursor: pointer;
+    }
+    .pressable:active {
+      transform: translateY(3px) !important;
+      box-shadow: 0 1px 0 rgba(139, 90, 43, 0.3) !important;
+    }
+
+    /* Bobbing & floating animations */
+    @keyframes bob {
+      0%, 100% { transform: translateY(0px) rotate(0deg); }
+      50% { transform: translateY(-5px) rotate(1.5deg); }
+    }
+    .animate-bob {
+      animation: bob 3.5s ease-in-out infinite;
+    }
+
+    @keyframes steam {
+      0% { opacity: 0; transform: translateY(0px) scale(0.6); }
+      50% { opacity: 0.8; transform: translateY(-16px) scale(1); }
+      100% { opacity: 0; transform: translateY(-32px) scale(1.4); }
+    }
+    .steam-bubble {
+      animation: steam 2s ease-out infinite;
+    }
+
+    /* Custom scrollbars */
+    ::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    ::-webkit-scrollbar-track {
+      background: transparent;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #D8AF80;
+      border-radius: 10px;
+    }
+
+    /* Safe bottom padding for mobile touch bar */
+    .mobile-safe-bottom {
+      padding-bottom: max(1.5rem, env(safe-area-inset-bottom, 1.5rem));
+    }
+  </style>
+</head>
+<body class="text-stone-800 antialiased min-h-screen flex justify-center selection:bg-amber-200">
+
+  <!-- Desktop Mobile Frame Wrapper (Lets users switch to realistic mobile view or wide view) -->
+  <div id="appContainer" class="w-full max-w-md min-h-screen bg-pantry-cream shadow-2xl relative flex flex-col border-x-4 border-pantry-wood/20 transition-all duration-300">
+    
+    <!-- Top Header: Playful Whimsical Kitchen Canopy -->
+    <header class="sticky top-0 z-30 bg-gradient-to-b from-[#EED9C4] to-[#FAF4EB] border-b-4 border-pantry-wood/40 px-4 pt-3 pb-3 shadow-md">
+      <!-- Whimsical Awning Scallops -->
+      <div class="flex items-center justify-between">
+        <div class="flex items-center gap-2">
+          <div class="w-10 h-10 rounded-2xl bg-amber-100 border-2 border-pantry-woodDark flex items-center justify-center text-2xl shadow-whimsy-sm animate-bob">
+            🧁
+          </div>
+          <div>
+            <h1 class="font-display font-bold text-xl text-pantry-woodDark tracking-tight flex items-center gap-1.5 leading-none">
+              PantryPal
+              <span class="text-xs bg-pantry-sage text-white px-2 py-0.5 rounded-full font-body font-semibold">whimsical</span>
+            </h1>
+            <p class="text-[11px] font-bold text-stone-500 tracking-wide">Scan • Stock • Cook</p>
+          </div>
+        </div>
+
+        <!-- Controls: Sound Toggle & Mobile Frame Toggle -->
+        <div class="flex items-center gap-1.5">
+          <button id="soundToggleBtn" onclick="toggleSound()" class="w-9 h-9 rounded-xl bg-amber-50 border-2 border-pantry-woodDark flex items-center justify-center text-stone-700 pressable shadow-whimsy-sm" title="Toggle whimsical sounds">
+            <span id="soundIcon">🔊</span>
+          </button>
+          <button id="frameToggleBtn" onclick="toggleFrameSize()" class="hidden md:flex w-9 h-9 rounded-xl bg-amber-50 border-2 border-pantry-woodDark items-center justify-center text-stone-700 pressable shadow-whimsy-sm" title="Toggle Desktop / Mobile view size">
+            <i data-lucide="smartphone" class="w-4 h-4"></i>
+          </button>
+        </div>
+      </div>
+
+      <!-- Quick Pantry Status Ribbon -->
+      <div class="mt-2.5 bg-white/80 backdrop-blur rounded-xl p-2 border-2 border-pantry-wood/30 flex items-center justify-between text-xs font-bold shadow-sm">
+        <div class="flex items-center gap-1 text-pantry-sage">
+          <span class="text-base">🥫</span>
+          <span id="statPantryCount">0 items stocked</span>
+        </div>
+        <div class="h-3 w-px bg-stone-300"></div>
+        <div class="flex items-center gap-1 text-pantry-terracotta">
+          <span class="text-base">🍳</span>
+          <span id="statReadyRecipes">0 ready to cook</span>
+        </div>
+      </div>
+    </header>
+
+    <!-- Main Dynamic Content Views -->
+    <main class="flex-1 overflow-y-auto px-4 py-4 pb-28">
+
+      <!-- ============================================== -->
+      <!-- VIEW 1: PANTRY SHELVES (Default)               -->
+      <!-- ============================================== -->
+      <section id="viewPantry" class="space-y-5">
+        
+        <!-- Shelf Header & Actions -->
+        <div class="flex items-center justify-between gap-2">
+          <div>
+            <h2 class="font-display font-bold text-2xl text-stone-800 flex items-center gap-2">
+              My Pantry Shelves 🪟
+            </h2>
+            <p class="text-xs text-stone-500 font-semibold">Ingredients fresh & ready to whip up!</p>
+          </div>
+          
+          <button onclick="openManualAddModal()" class="px-3 py-1.5 rounded-xl bg-pantry-sage text-white font-display font-bold text-xs border-2 border-emerald-900 pressable shadow-whimsy-sm flex items-center gap-1">
+            <i data-lucide="plus" class="w-3.5 h-3.5"></i>
+            <span>Add Item</span>
+          </button>
+        </div>
+
+        <!-- Category Filter Pills (Wooden Rack Style) -->
+        <div class="flex items-center gap-1.5 overflow-x-auto pb-1.5 no-scrollbar text-xs font-bold">
+          <button onclick="setCategoryFilter('all')" class="cat-pill active px-3 py-1.5 rounded-full border-2 border-pantry-woodDark bg-pantry-wood text-white shadow-whimsy-sm whitespace-nowrap transition-all" data-category="all">
+            All Jars ✨
+          </button>
+          <button onclick="setCategoryFilter('Produce')" class="cat-pill px-3 py-1.5 rounded-full border-2 border-pantry-woodDark bg-white text-stone-700 shadow-whimsy-sm whitespace-nowrap" data-category="Produce">
+            🥦 Produce
+          </button>
+          <button onclick="setCategoryFilter('Dairy')" class="cat-pill px-3 py-1.5 rounded-full border-2 border-pantry-woodDark bg-white text-stone-700 shadow-whimsy-sm whitespace-nowrap" data-category="Dairy">
+            🧀 Dairy & Cold
+          </button>
+          <button onclick="setCategoryFilter('Grains')" class="cat-pill px-3 py-1.5 rounded-full border-2 border-pantry-woodDark bg-white text-stone-700 shadow-whimsy-sm whitespace-nowrap" data-category="Grains">
+            🌾 Grains & Pasta
+          </button>
+          <button onclick="setCategoryFilter('Protein')" class="cat-pill px-3 py-1.5 rounded-full border-2 border-pantry-woodDark bg-white text-stone-700 shadow-whimsy-sm whitespace-nowrap" data-category="Protein">
+            🥩 Protein & Meats
+          </button>
+          <button onclick="setCategoryFilter('Spices')" class="cat-pill px-3 py-1.5 rounded-full border-2 border-pantry-woodDark bg-white text-stone-700 shadow-whimsy-sm whitespace-nowrap" data-category="Spices">
+            🧂 Spices & Oil
+          </button>
+          <button onclick="setCategoryFilter('Bakery')" class="cat-pill px-3 py-1.5 rounded-full border-2 border-pantry-woodDark bg-white text-stone-700 shadow-whimsy-sm whitespace-nowrap" data-category="Bakery">
+            🍞 Bakery
+          </button>
+          <button onclick="setCategoryFilter('Drinks')" class="cat-pill px-3 py-1.5 rounded-full border-2 border-pantry-woodDark bg-white text-stone-700 shadow-whimsy-sm whitespace-nowrap" data-category="Drinks">
+            🥤 Drinks & Sips
+          </button>
+        </div>
+
+        <!-- Search Bar -->
+        <div class="relative">
+          <input type="text" id="pantrySearchInput" oninput="renderPantry()" placeholder="Search ingredients (e.g. eggs, garlic, pasta)..." class="w-full bg-white/90 border-2 border-pantry-wood/50 rounded-2xl py-2 pl-9 pr-4 text-xs font-bold text-stone-700 placeholder-stone-400 focus:outline-none focus:border-pantry-woodDark shadow-inner">
+          <i data-lucide="search" class="w-4 h-4 text-stone-400 absolute left-3 top-2.5"></i>
+        </div>
+
+        <!-- Illustrated Pantry Shelves Area -->
+        <div id="pantryShelvesContainer" class="space-y-6">
+          <!-- Populated dynamically with grouped shelves -->
+        </div>
+
+        <!-- Empty Pantry State -->
+        <div id="emptyPantryState" class="hidden text-center py-10 px-4 bg-white/60 border-2 border-dashed border-pantry-wood/40 rounded-3xl">
+          <div class="text-5xl mb-2 animate-bounce">🧺</div>
+          <h3 class="font-display font-bold text-lg text-stone-700">Your pantry is bare!</h3>
+          <p class="text-xs text-stone-500 max-w-xs mx-auto mt-1 mb-4 font-semibold">
+            Scan your grocery receipt or add a few items to unlock whimsical recipe suggestions.
+          </p>
+          <div class="flex flex-col gap-2 max-w-xs mx-auto">
+            <button onclick="switchTab('scan')" class="w-full py-2.5 px-4 bg-pantry-terracotta text-white font-display font-bold text-sm rounded-xl border-2 border-amber-950 shadow-whimsy-btn pressable flex items-center justify-center gap-2">
+              <i data-lucide="camera" class="w-4 h-4"></i>
+              <span>Scan Grocery Receipt</span>
+            </button>
+            <button onclick="loadSamplePantryData()" class="w-full py-2 px-4 bg-amber-100 text-pantry-woodDark font-display font-bold text-xs rounded-xl border-2 border-pantry-woodDark shadow-whimsy-sm pressable">
+              ✨ Fill with Sample Groceries
+            </button>
+          </div>
+        </div>
+
+      </section>
+
+      <!-- ============================================== -->
+      <!-- VIEW 2: SCAN RECEIPT                           -->
+      <!-- ============================================== -->
+      <section id="viewScan" class="space-y-4 hidden">
+        
+        <div class="text-center space-y-1">
+          <div class="inline-flex p-3 rounded-2xl bg-amber-100 border-2 border-pantry-woodDark shadow-whimsy-sm mb-1">
+            <span class="text-3xl">🧾✨</span>
+          </div>
+          <h2 class="font-display font-bold text-2xl text-stone-800">Scan Grocery Receipt</h2>
+          <p class="text-xs text-stone-500 font-semibold max-w-xs mx-auto">
+            Snap your receipt! Antigravity OCR extracts your ingredients and organizes them on your shelves.
+          </p>
+        </div>
+
+        <!-- Memory Bank & Audit Shortcuts -->
+        <div class="flex items-center justify-between px-1">
+          <button onclick="openLearnedMemoryModal()" class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-amber-50 hover:bg-amber-100 border border-pantry-wood/40 text-stone-700 rounded-xl text-xs font-bold transition-all shadow-sm">
+            <span>🧠</span>
+            <span>Memory Bank (<span id="scanTabLearnedCount">0</span> taught)</span>
+          </button>
+          <button onclick="openScanAuditModal()" class="inline-flex items-center gap-1 text-[11px] font-bold text-stone-500 hover:text-stone-800 underline">
+            <i data-lucide="file-text" class="w-3.5 h-3.5"></i>
+            <span>Diagnostic Audit</span>
+          </button>
+        </div>
+
+        <!-- Scan Options Card (Photo Upload / Camera / Instant Presets) -->
+        <div class="bg-white border-3 border-pantry-woodDark rounded-3xl p-4 shadow-shelf space-y-4">
+          
+          <!-- Image Drop / Capture Area -->
+          <div id="dropZone" class="relative border-2 border-dashed border-pantry-wood/60 hover:border-pantry-woodDark bg-amber-50/50 rounded-2xl p-6 text-center transition-all cursor-pointer group">
+            <input type="file" id="receiptFileInput" accept="image/*" capture="environment" onchange="handleReceiptFile(event)" class="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10">
+            
+            <div id="dropZoneContent" class="space-y-2 pointer-events-none">
+              <div class="w-14 h-14 mx-auto rounded-2xl bg-white border-2 border-pantry-wood flex items-center justify-center text-pantry-terracotta group-hover:scale-110 transition-transform shadow-sm">
+                <i data-lucide="camera" class="w-7 h-7"></i>
+              </div>
+              <p class="font-display font-bold text-sm text-stone-700">Tap to Snap Camera or Upload</p>
+              <p class="text-[11px] text-stone-400 font-semibold">Supports JPG, PNG receipt photos</p>
+            </div>
+
+            <!-- Preview Image when selected -->
+            <div id="receiptPreviewWrap" class="hidden relative">
+              <img id="receiptPreviewImg" src="" alt="Receipt Preview" class="max-h-48 mx-auto rounded-lg border-2 border-pantry-wood shadow-md object-contain bg-white">
+              <button onclick="clearReceiptUpload(event)" class="absolute top-1 right-1 bg-red-500 text-white rounded-full p-1 text-xs shadow-md z-20">
+                <i data-lucide="x" class="w-4 h-4"></i>
+              </button>
+            </div>
+          </div>
+
+          <!-- OCR Processing Progress Banner (Hidden by default) -->
+          <div id="ocrProgressBanner" class="hidden bg-amber-50 border-2 border-pantry-wood/40 rounded-2xl p-3 space-y-2">
+            <div class="flex items-center justify-between text-xs font-bold text-stone-700">
+              <span class="flex items-center gap-1.5">
+                <span class="inline-block animate-spin">🪄</span>
+                <span id="ocrStatusText">Reading receipt with AI...</span>
+              </span>
+              <span id="ocrPercent">0%</span>
+            </div>
+            <div class="w-full bg-amber-200/60 rounded-full h-2.5 overflow-hidden">
+              <div id="ocrProgressBar" class="bg-pantry-sage h-2.5 rounded-full transition-all duration-300" style="width: 0%"></div>
+            </div>
+          </div>
+
+          <!-- Divider -->
+          <div class="flex items-center gap-2">
+            <div class="flex-1 h-px bg-stone-200"></div>
+            <span class="text-[11px] font-bold text-stone-400 uppercase tracking-wider">or test instantly</span>
+            <div class="flex-1 h-px bg-stone-200"></div>
+          </div>
+
+          <!-- Quick Test Sample Receipts Buttons -->
+          <div>
+            <p class="text-xs font-bold text-stone-600 mb-2 flex items-center gap-1">
+              <span>🌟</span> Try Real Pre-loaded Grocery Receipts:
+            </p>
+            <div class="grid grid-cols-2 gap-2 text-xs font-bold">
+              <button onclick="loadPresetReceipt('trader_joes')" class="p-2.5 rounded-xl border-2 border-pantry-wood/50 bg-[#FFFBF0] hover:bg-amber-100 text-stone-700 pressable shadow-whimsy-sm text-left flex items-center gap-2">
+                <span class="text-xl">🥑</span>
+                <div>
+                  <div class="font-display">Trader Joe's Haul</div>
+                  <div class="text-[10px] text-stone-400 font-semibold font-body">Pasta, Eggs, Cheese...</div>
+                </div>
+              </button>
+              <button onclick="loadPresetReceipt('farmers_market')" class="p-2.5 rounded-xl border-2 border-pantry-wood/50 bg-[#F4F9F4] hover:bg-emerald-100 text-stone-700 pressable shadow-whimsy-sm text-left flex items-center gap-2">
+                <span class="text-xl">🍅</span>
+                <div>
+                  <div class="font-display">Farmers Market</div>
+                  <div class="text-[10px] text-stone-400 font-semibold font-body">Tomatoes, Basil, Garlic...</div>
+                </div>
+              </button>
+              <button onclick="loadPresetReceipt('weekend_brunch')" class="p-2.5 rounded-xl border-2 border-pantry-wood/50 bg-[#FBF0F5] hover:bg-pink-100 text-stone-700 pressable shadow-whimsy-sm text-left flex items-center gap-2">
+                <span class="text-xl">🥞</span>
+                <div>
+                  <div class="font-display">Pancake Morning</div>
+                  <div class="text-[10px] text-stone-400 font-semibold font-body">Flour, Milk, Butter...</div>
+                </div>
+              </button>
+              <button onclick="loadPresetReceipt('taco_night')" class="p-2.5 rounded-xl border-2 border-pantry-wood/50 bg-[#FFF5EA] hover:bg-orange-100 text-stone-700 pressable shadow-whimsy-sm text-left flex items-center gap-2">
+                <span class="text-xl">🌮</span>
+                <div>
+                  <div class="font-display">Fiesta Taco Haul</div>
+                  <div class="text-[10px] text-stone-400 font-semibold font-body">Beef, Tortillas, Onion...</div>
+                </div>
+              </button>
+            </div>
+          </div>
+
+          <!-- Paste Receipt Text Toggle -->
+          <div class="pt-1">
+            <button onclick="togglePasteReceiptBox()" class="text-xs font-bold text-pantry-woodDark hover:underline flex items-center gap-1 mx-auto">
+              <i data-lucide="edit-3" class="w-3.5 h-3.5"></i>
+              <span>Or paste receipt text directly</span>
+            </button>
+            <div id="pasteReceiptBox" class="hidden mt-3 space-y-2">
+              <textarea id="pasteReceiptText" rows="4" placeholder="Paste your grocery store receipt text here...
+Example:
+ORGANIC EGGS 1 DOZ 3.99
+CHERRY TOMATOES 1 PINT 2.50
+WHOLE MILK 1 GAL 4.29
+SPAGHETTI PASTA 16 OZ 1.49" class="w-full text-xs font-mono p-3 bg-stone-50 border-2 border-pantry-wood/40 rounded-xl focus:outline-none focus:border-pantry-woodDark"></textarea>
+              <button onclick="parsePastedReceipt()" class="w-full py-2 bg-pantry-wood text-white font-display font-bold text-xs rounded-xl border-2 border-amber-950 shadow-whimsy-sm pressable">
+                Extract Items from Text
+              </button>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- Scanned Items Review Sheet (Appears after scanning or preset) -->
+        <div id="scannedReviewSection" class="hidden bg-white border-3 border-pantry-woodDark rounded-3xl p-4 shadow-shelf space-y-4">
+          <div class="flex items-center justify-between border-b-2 border-stone-100 pb-3">
+            <div>
+              <h3 class="font-display font-bold text-lg text-stone-800 flex items-center gap-1.5">
+                <span>🛒</span> Scanned Groceries (<span id="scannedCountBadge">0</span>)
+              </h3>
+              <p class="text-[11px] text-stone-500 font-semibold">Review, adjust, or teach new items before stocking!</p>
+            </div>
+            <div class="flex items-center gap-1.5">
+              <button onclick="openLearnedMemoryModal()" class="px-2.5 py-1 bg-amber-50 hover:bg-amber-100 border border-pantry-wood/50 text-stone-700 text-xs font-bold rounded-lg shadow-sm pressable flex items-center gap-1" title="View Learned Grocery Memory">
+                <span>🧠</span> <span id="learnedMemoryQuickBadge">0</span>
+              </button>
+              <button onclick="addScannedRow()" class="px-2.5 py-1 bg-amber-100 border border-pantry-woodDark text-stone-700 text-xs font-bold rounded-lg shadow-sm pressable">
+                + Add
+              </button>
+            </div>
+          </div>
+
+          <!-- Self-Learning Explainer Banner -->
+          <div class="bg-gradient-to-r from-amber-50 to-orange-50 border border-amber-200/80 rounded-2xl p-2.5 flex items-center gap-2.5 text-xs text-stone-600 font-semibold">
+            <span class="text-xl flex-shrink-0">💡</span>
+            <div class="text-[11px] leading-tight">
+              <strong>Smart Learning Active:</strong> Any names or categories you adjust here will be remembered automatically for your future grocery receipts!
+            </div>
+          </div>
+
+          <!-- Scanned Items List -->
+          <div id="scannedItemsList" class="space-y-2 max-h-72 overflow-y-auto pr-1">
+            <!-- Dynamically populated rows -->
+          </div>
+
+          <!-- Action Button: Commit to Pantry -->
+          <button id="commitToPantryBtn" onclick="commitScannedToPantry()" class="w-full py-3.5 px-4 bg-pantry-sage hover:bg-emerald-600 text-white font-display font-bold text-base rounded-2xl border-3 border-emerald-950 shadow-whimsy-btn pressable flex items-center justify-center gap-2">
+            <i data-lucide="sparkles" class="w-5 h-5"></i>
+            <span>Put All in My Pantry!</span>
+          </button>
+
+          <!-- Backend Logging & Audit Bar -->
+          <div class="bg-amber-50/80 border border-pantry-wood/40 rounded-2xl p-3 flex flex-col gap-2">
+            <div class="flex items-center justify-between text-xs">
+              <span class="flex items-center gap-1.5 font-bold text-stone-700">
+                <span class="text-emerald-600">●</span>
+                <span id="backendLogStatus">Backend Logged to logs/receipt-scans.log</span>
+              </span>
+              <span id="auditStatsBadge" class="text-[10px] font-bold bg-amber-200/70 text-stone-700 px-2 py-0.5 rounded-full">
+                0 detected • 0 skipped
+              </span>
+            </div>
+            
+            <div class="flex items-center gap-2">
+              <button onclick="openScanAuditModal()" class="flex-1 py-1.5 px-3 bg-white hover:bg-stone-50 border border-pantry-woodDark text-stone-800 text-xs font-display font-bold rounded-xl shadow-sm pressable flex items-center justify-center gap-1.5">
+                <i data-lucide="file-search" class="w-3.5 h-3.5 text-pantry-terracotta"></i>
+                <span>🔍 Inspect Raw Scan & Line Audit</span>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Standalone Quick Access to Backend Logs -->
+        <div class="text-center pt-2">
+          <button onclick="openScanAuditModal()" class="text-xs font-bold text-stone-500 hover:text-stone-800 underline decoration-dashed flex items-center justify-center gap-1 mx-auto">
+            <i data-lucide="terminal" class="w-3.5 h-3.5"></i>
+            <span>View Receipt Scan Backend Logs</span>
+          </button>
+        </div>
+
+      </section>
+
+      <!-- ============================================== -->
+      <!-- VIEW 3: RECIPES & COOKING                      -->
+      <!-- ============================================== -->
+      <section id="viewRecipes" class="space-y-4 hidden">
+        
+        <div class="flex items-center justify-between">
+          <div>
+            <h2 class="font-display font-bold text-2xl text-stone-800 flex items-center gap-2">
+              Recipe Suggestions 🍲
+            </h2>
+            <p class="text-xs text-stone-500 font-semibold">Matched dynamically to your pantry ingredients</p>
+          </div>
+
+          <div class="flex items-center gap-1.5">
+            <button onclick="openMealDbModal()" class="px-2.5 py-1.5 rounded-xl bg-amber-100 hover:bg-amber-200 text-pantry-woodDark font-display font-bold text-xs border-2 border-pantry-woodDark pressable shadow-whimsy-sm flex items-center gap-1" title="Discover recipes online via free TheMealDB API">
+              <span>🌐</span>
+              <span class="hidden sm:inline">Explore</span> API
+            </button>
+            <button onclick="openCustomRecipeModal()" class="px-3 py-1.5 rounded-xl bg-pantry-terracotta text-white font-display font-bold text-xs border-2 border-red-950 pressable shadow-whimsy-sm flex items-center gap-1">
+              <i data-lucide="plus" class="w-3.5 h-3.5"></i>
+              <span>Add</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Pre-populate & Discover Banner -->
+        <div class="bg-gradient-to-r from-amber-50 to-orange-50 border-2 border-pantry-wood/40 rounded-2xl p-2.5 flex items-center justify-between gap-2 text-xs">
+          <div class="flex items-center gap-2">
+            <span class="text-2xl">✨</span>
+            <div>
+              <div class="font-display font-bold text-stone-800">Free Recipe API Connected</div>
+              <div class="text-[10px] text-stone-500 font-semibold">Pre-populated with 25+ dishes & live TheMealDB search</div>
+            </div>
+          </div>
+          <button onclick="openMealDbModal()" class="px-3 py-1 bg-pantry-sage text-white font-display font-bold text-xs rounded-xl border border-emerald-950 shadow-sm pressable whitespace-nowrap">
+            Search 500+
+          </button>
+        </div>
+
+        <!-- Recipe Filter Buttons -->
+        <div class="flex items-center gap-1.5 overflow-x-auto pb-1 text-xs font-bold no-scrollbar">
+          <button onclick="setRecipeFilter('can_cook')" class="recipe-filter active px-3 py-1.5 rounded-full border-2 border-emerald-800 bg-pantry-sage text-white shadow-whimsy-sm whitespace-nowrap" data-filter="can_cook">
+            🔥 Ready to Cook (<span id="filterReadyCount">0</span>)
+          </button>
+          <button onclick="setRecipeFilter('all')" class="recipe-filter px-3 py-1.5 rounded-full border-2 border-pantry-woodDark bg-white text-stone-700 shadow-whimsy-sm whitespace-nowrap" data-filter="all">
+            📖 All Recipes (<span id="filterAllCount">0</span>)
+          </button>
+          <button onclick="setRecipeFilter('almost')" class="recipe-filter px-3 py-1.5 rounded-full border-2 border-pantry-woodDark bg-white text-stone-700 shadow-whimsy-sm whitespace-nowrap" data-filter="almost">
+            🛒 Need 1-2 Items
+          </button>
+          <button onclick="setRecipeFilter('quick')" class="recipe-filter px-3 py-1.5 rounded-full border-2 border-pantry-woodDark bg-white text-stone-700 shadow-whimsy-sm whitespace-nowrap" data-filter="quick">
+            ⚡ Under 20 min
+          </button>
+        </div>
+
+        <!-- Recipe Cards List -->
+        <div id="recipeCardsContainer" class="space-y-4">
+          <!-- Dynamically populated recipe cards -->
+        </div>
+
+        <!-- Empty Recipe Suggestions State -->
+        <div id="emptyRecipeState" class="hidden text-center py-10 px-4 bg-white/70 border-2 border-dashed border-pantry-wood/40 rounded-3xl">
+          <div class="text-5xl mb-2">🍳🔍</div>
+          <h3 class="font-display font-bold text-lg text-stone-700">No matching recipes yet</h3>
+          <p class="text-xs text-stone-500 max-w-xs mx-auto mt-1 mb-4 font-semibold">
+            Stock up your shelves with more ingredients, or switch to view "All Recipes" to see what you need!
+          </p>
+          <button onclick="setRecipeFilter('all')" class="px-4 py-2 bg-pantry-wood text-white font-display font-bold text-xs rounded-xl border-2 border-pantry-woodDark shadow-whimsy-sm pressable">
+            Show All Recipes
+          </button>
+        </div>
+
+      </section>
+
+      <!-- ============================================== -->
+      <!-- VIEW 4: COOKBOOK LOG & SHOPPING LIST           -->
+      <!-- ============================================== -->
+      <section id="viewHistory" class="space-y-4 hidden">
+        
+        <div>
+          <h2 class="font-display font-bold text-2xl text-stone-800 flex items-center gap-2">
+            Chef's Journal 📖
+          </h2>
+          <p class="text-xs text-stone-500 font-semibold">Past creations & restock grocery list</p>
+        </div>
+
+        <!-- Tabs: Cooking Log vs Depleted / Shopping List -->
+        <div class="grid grid-cols-2 gap-2 bg-amber-100/70 p-1 rounded-2xl border-2 border-pantry-wood/30 font-display font-bold text-xs">
+          <button id="subtabHistoryBtn" onclick="switchJournalTab('history')" class="py-2 rounded-xl bg-white border-2 border-pantry-woodDark text-stone-800 shadow-sm">
+            🍳 Meals Cooked (<span id="historyCount">0</span>)
+          </button>
+          <button id="subtabShoppingBtn" onclick="switchJournalTab('shopping')" class="py-2 rounded-xl text-stone-500 hover:text-stone-800">
+            📝 Shopping List (<span id="shoppingCount">0</span>)
+          </button>
+        </div>
+
+        <!-- Subview A: Cook History -->
+        <div id="journalHistorySection" class="space-y-3">
+          <div id="cookHistoryList" class="space-y-3">
+            <!-- Dynamically populated history -->
+          </div>
+          <div id="emptyHistoryState" class="text-center py-8 text-stone-400 text-xs font-semibold">
+            <span class="text-4xl block mb-2">🍽️</span>
+            No dishes cooked yet. Go to Recipes and tap "Cook"!
+          </div>
+        </div>
+
+        <!-- Subview B: Shopping / Depleted List -->
+        <div id="journalShoppingSection" class="space-y-3 hidden">
+          <div class="flex items-center justify-between">
+            <p class="text-xs text-stone-500 font-semibold">Items that ran out or are needed for recipes:</p>
+            <button onclick="clearShoppingList()" class="text-[11px] text-red-500 font-bold hover:underline">Clear all</button>
+          </div>
+          
+          <div id="shoppingItemsList" class="space-y-2">
+            <!-- Dynamically populated shopping list -->
+          </div>
+
+          <div id="emptyShoppingState" class="text-center py-8 text-stone-400 text-xs font-semibold">
+            <span class="text-4xl block mb-2">✨</span>
+            Your shopping list is clear!
+          </div>
+        </div>
+
+      </section>
+
+    </main>
+
+    <!-- Bottom Navigation Bar (Mobile Friendly Thumb-Reachable) -->
+    <nav class="fixed bottom-0 left-0 right-0 max-w-md mx-auto z-40 bg-white/95 backdrop-blur-md border-t-3 border-pantry-wood/40 px-3 py-2 shadow-2xl flex items-center justify-around mobile-safe-bottom">
+      
+      <!-- Nav 1: Pantry Shelves -->
+      <button onclick="switchTab('pantry')" id="navPantry" class="nav-btn active flex flex-col items-center gap-1 py-1 px-3 rounded-2xl transition-all text-pantry-woodDark font-display font-bold text-xs pressable">
+        <div class="w-8 h-8 rounded-xl bg-amber-100 flex items-center justify-center text-lg border-2 border-pantry-woodDark shadow-sm nav-icon-wrap">
+          🥫
+        </div>
+        <span>Pantry</span>
+      </button>
+
+      <!-- Nav 2: Scan Receipt (Central Highlighted Button) -->
+      <button onclick="switchTab('scan')" id="navScan" class="nav-btn flex flex-col items-center gap-1 -mt-5 py-1 px-3 transition-all pressable group">
+        <div class="w-13 h-13 p-3 rounded-2xl bg-gradient-to-b from-pantry-terracotta to-red-500 border-3 border-amber-950 flex items-center justify-center text-white text-2xl shadow-whimsy-btn group-hover:scale-105 transition-transform">
+          🧾
+        </div>
+        <span class="font-display font-bold text-xs text-stone-700">Scan</span>
+      </button>
+
+      <!-- Nav 3: Recipes -->
+      <button onclick="switchTab('recipes')" id="navRecipes" class="nav-btn flex flex-col items-center gap-1 py-1 px-3 rounded-2xl transition-all text-stone-400 font-display font-bold text-xs pressable">
+        <div class="w-8 h-8 rounded-xl bg-stone-100 flex items-center justify-center text-lg border-2 border-stone-300 shadow-sm nav-icon-wrap">
+          🍲
+        </div>
+        <span>Recipes</span>
+      </button>
+
+      <!-- Nav 4: Journal / Shopping -->
+      <button onclick="switchTab('history')" id="navHistory" class="nav-btn flex flex-col items-center gap-1 py-1 px-3 rounded-2xl transition-all text-stone-400 font-display font-bold text-xs pressable">
+        <div class="w-8 h-8 rounded-xl bg-stone-100 flex items-center justify-center text-lg border-2 border-stone-300 shadow-sm nav-icon-wrap">
+          📖
+        </div>
+        <span>Journal</span>
+      </button>
+
+    </nav>
+
+    <!-- ============================================== -->
+    <!-- MODALS & WHIMSICAL POPUPS                      -->
+    <!-- ============================================== -->
+
+    <!-- 1. COOKING CONFIRMATION & ANIMATION MODAL -->
+    <div id="cookModal" class="fixed inset-0 z-50 bg-stone-900/60 backdrop-blur-sm flex items-center justify-center p-4 hidden">
+      <div class="bg-white border-4 border-pantry-woodDark rounded-3xl max-w-sm w-full p-5 shadow-2xl space-y-4 relative overflow-hidden animate-bob">
+        
+        <!-- Whimsical Steaming Pot Animation Scene -->
+        <div id="cookPrepState" class="space-y-4">
+          <div class="text-center relative pt-2">
+            <!-- Animated Steam Bubbles -->
+            <div class="flex justify-center gap-2 mb-1">
+              <span class="steam-bubble text-lg" style="animation-delay: 0s;">💨</span>
+              <span class="steam-bubble text-xl" style="animation-delay: 0.4s;">✨</span>
+              <span class="steam-bubble text-lg" style="animation-delay: 0.8s;">💨</span>
+            </div>
+            
+            <div class="w-20 h-20 mx-auto rounded-3xl bg-amber-100 border-3 border-pantry-woodDark flex items-center justify-center text-4xl shadow-whimsy-sm mb-2">
+              <span id="cookRecipeEmoji">🍳</span>
+            </div>
+
+            <h3 class="font-display font-bold text-2xl text-stone-800" id="cookRecipeTitle">Ready to Cook?</h3>
+            <p class="text-xs text-stone-500 font-semibold" id="cookRecipeSubtitle">
+              This will automatically deduct the required ingredients from your pantry!
+            </p>
+          </div>
+
+          <!-- Required Ingredients Deductions Preview -->
+          <div class="bg-amber-50/70 border-2 border-pantry-wood/30 rounded-2xl p-3 space-y-2">
+            <p class="text-[11px] font-bold text-pantry-woodDark uppercase tracking-wider">Pantry Ingredients to Subtract:</p>
+            <div id="cookDeductionsList" class="space-y-1.5 max-h-40 overflow-y-auto pr-1 text-xs">
+              <!-- Populated dynamically -->
+            </div>
+          </div>
+
+          <!-- Buttons -->
+          <div class="flex gap-2">
+            <button onclick="closeCookModal()" class="flex-1 py-2.5 bg-stone-100 hover:bg-stone-200 text-stone-700 font-display font-bold text-xs rounded-xl border-2 border-stone-300 pressable">
+              Cancel
+            </button>
+            <button onclick="executeCooking()" class="flex-2 py-3 px-4 bg-gradient-to-r from-pantry-terracotta to-orange-500 text-white font-display font-bold text-sm rounded-xl border-2 border-amber-950 shadow-whimsy-btn pressable flex items-center justify-center gap-2">
+              <span>🔥 Start Cooking!</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Cooking Celebration Animation (Shown upon clicking Cook) -->
+        <div id="cookCelebrationState" class="hidden text-center py-6 space-y-3">
+          <div class="text-6xl animate-bounce">🥘</div>
+          <h3 class="font-display font-bold text-2xl text-pantry-woodDark">Bon Appétit! 🌟</h3>
+          <p class="text-xs text-stone-600 font-semibold" id="cookCelebrationMessage">
+            Delicious! The ingredients were successfully subtracted from your pantry shelves.
+          </p>
+          <div class="p-3 bg-emerald-50 rounded-2xl border-2 border-emerald-300 text-emerald-800 text-xs font-bold">
+            🎉 Meal logged in Chef's Journal!
+          </div>
+          <button onclick="closeCookModal()" class="w-full py-2.5 bg-pantry-sage text-white font-display font-bold text-sm rounded-xl border-2 border-emerald-950 shadow-whimsy-sm pressable">
+            Back to Kitchen
+          </button>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- 2. MANUAL ADD / EDIT INGREDIENT MODAL -->
+    <div id="itemModal" class="fixed inset-0 z-50 bg-stone-900/60 backdrop-blur-sm flex items-center justify-center p-4 hidden">
+      <div class="bg-white border-4 border-pantry-woodDark rounded-3xl max-w-sm w-full p-5 shadow-2xl space-y-4">
+        
+        <div class="flex items-center justify-between border-b-2 border-stone-100 pb-2">
+          <h3 class="font-display font-bold text-lg text-stone-800 flex items-center gap-1.5" id="itemModalTitle">
+            <span>🥫</span> Add Ingredient
+          </h3>
+          <button onclick="closeItemModal()" class="w-7 h-7 rounded-full bg-stone-100 text-stone-500 flex items-center justify-center hover:bg-stone-200">
+            <i data-lucide="x" class="w-4 h-4"></i>
+          </button>
+        </div>
+
+        <form id="itemForm" onsubmit="saveIngredient(event)" class="space-y-3">
+          <input type="hidden" id="editItemId" value="">
+
+          <div>
+            <label class="block text-xs font-bold text-stone-600 mb-1">Ingredient Name</label>
+            <div class="flex gap-2">
+              <input type="text" id="itemEmojiInput" value="🥫" class="w-12 text-center text-xl bg-amber-50 border-2 border-pantry-wood/40 rounded-xl" title="Emoji">
+              <input type="text" id="itemNameInput" required placeholder="e.g. Cherry Tomatoes, Eggs, Flour..." class="flex-1 text-xs font-bold p-2.5 bg-stone-50 border-2 border-pantry-wood/40 rounded-xl focus:outline-none focus:border-pantry-woodDark">
+            </div>
+          </div>
+
+          <div class="grid grid-cols-2 gap-2">
+            <div>
+              <label class="block text-xs font-bold text-stone-600 mb-1">Quantity</label>
+              <input type="number" id="itemQtyInput" step="any" required min="0.1" value="1" class="w-full text-xs font-bold p-2.5 bg-stone-50 border-2 border-pantry-wood/40 rounded-xl focus:outline-none focus:border-pantry-woodDark">
+            </div>
+            <div>
+              <label class="block text-xs font-bold text-stone-600 mb-1">Unit</label>
+              <select id="itemUnitInput" class="w-full text-xs font-bold p-2.5 bg-stone-50 border-2 border-pantry-wood/40 rounded-xl focus:outline-none focus:border-pantry-woodDark">
+                <option value="pcs">pieces (pcs)</option>
+                <option value="lbs">pounds (lbs)</option>
+                <option value="oz">ounces (oz)</option>
+                <option value="g">grams (g)</option>
+                <option value="kg">kilograms (kg)</option>
+                <option value="cups">cups</option>
+                <option value="carton">carton</option>
+                <option value="bunch">bunch</option>
+                <option value="jar">jar</option>
+                <option value="can">can</option>
+                <option value="tbsp">tbsp</option>
+                <option value="tsp">tsp</option>
+              </select>
+            </div>
+          </div>
+
+          <div>
+            <label class="block text-xs font-bold text-stone-600 mb-1">Shelf Category</label>
+            <select id="itemCategoryInput" class="w-full text-xs font-bold p-2.5 bg-stone-50 border-2 border-pantry-wood/40 rounded-xl focus:outline-none focus:border-pantry-woodDark">
+              <option value="Produce">🥦 Fresh Produce</option>
+              <option value="Dairy">🧀 Dairy & Chilled</option>
+              <option value="Grains">🌾 Grains & Pasta</option>
+              <option value="Protein">🥩 Protein & Meat</option>
+              <option value="Spices">🧂 Spices & Seasoning</option>
+              <option value="Bakery">🍞 Bakery & Bread</option>
+              <option value="Drinks">🥤 Drinks & Beverages</option>
+            </select>
+          </div>
+
+          <div>
+            <label class="block text-xs font-bold text-stone-600 mb-1">Freshness / Shelf Life</label>
+            <select id="itemFreshnessInput" class="w-full text-xs font-bold p-2.5 bg-stone-50 border-2 border-pantry-wood/40 rounded-xl focus:outline-none focus:border-pantry-woodDark">
+              <option value="fresh">🌿 Super Fresh (7+ days)</option>
+              <option value="ripe">☀️ Good Condition (3-5 days)</option>
+              <option value="soon">⏰ Use Soon (1-2 days)</option>
+            </select>
+          </div>
+
+          <div class="pt-2 flex gap-2">
+            <button type="button" onclick="closeItemModal()" class="flex-1 py-2.5 bg-stone-100 text-stone-700 font-display font-bold text-xs rounded-xl border-2 border-stone-300 pressable">
+              Cancel
+            </button>
+            <button type="submit" class="flex-1 py-2.5 bg-pantry-sage text-white font-display font-bold text-xs rounded-xl border-2 border-emerald-950 shadow-whimsy-sm pressable">
+              Save to Shelf
+            </button>
+          </div>
+        </form>
+
+      </div>
+    </div>
+
+    <!-- 3. CUSTOM RECIPE CREATOR MODAL -->
+    <div id="customRecipeModal" class="fixed inset-0 z-50 bg-stone-900/60 backdrop-blur-sm flex items-center justify-center p-4 hidden">
+      <div class="bg-white border-4 border-pantry-woodDark rounded-3xl max-w-sm w-full p-5 shadow-2xl space-y-4 max-h-[90vh] overflow-y-auto">
+        
+        <div class="flex items-center justify-between border-b-2 border-stone-100 pb-2">
+          <h3 class="font-display font-bold text-lg text-stone-800 flex items-center gap-1.5">
+            <span>👩‍🍳</span> Create Your Recipe
+          </h3>
+          <button onclick="closeCustomRecipeModal()" class="w-7 h-7 rounded-full bg-stone-100 text-stone-500 flex items-center justify-center hover:bg-stone-200">
+            <i data-lucide="x" class="w-4 h-4"></i>
+          </button>
+        </div>
+
+        <form id="recipeForm" onsubmit="saveCustomRecipe(event)" class="space-y-3">
+          <div>
+            <label class="block text-xs font-bold text-stone-600 mb-1">Recipe Title</label>
+            <div class="flex gap-2">
+              <input type="text" id="recipeEmojiInput" value="🍲" class="w-12 text-center text-xl bg-amber-50 border-2 border-pantry-wood/40 rounded-xl" title="Emoji">
+              <input type="text" id="recipeTitleInput" required placeholder="e.g. Grandma's Tomato Pasta" class="flex-1 text-xs font-bold p-2.5 bg-stone-50 border-2 border-pantry-wood/40 rounded-xl focus:outline-none focus:border-pantry-woodDark">
+            </div>
+          </div>
+
+          <div class="grid grid-cols-2 gap-2">
+            <div>
+              <label class="block text-xs font-bold text-stone-600 mb-1">Cook Time (min)</label>
+              <input type="number" id="recipeTimeInput" required min="5" value="20" class="w-full text-xs font-bold p-2.5 bg-stone-50 border-2 border-pantry-wood/40 rounded-xl">
+            </div>
+            <div>
+              <label class="block text-xs font-bold text-stone-600 mb-1">Servings</label>
+              <input type="number" id="recipeServingsInput" required min="1" value="2" class="w-full text-xs font-bold p-2.5 bg-stone-50 border-2 border-pantry-wood/40 rounded-xl">
+            </div>
+          </div>
+
+          <div>
+            <div class="flex items-center justify-between mb-1">
+              <label class="text-xs font-bold text-stone-600">Required Ingredients</label>
+              <button type="button" onclick="addCustomRecipeIngRow()" class="text-xs font-bold text-pantry-terracotta hover:underline">+ Add line</button>
+            </div>
+            <div id="customRecipeIngList" class="space-y-2">
+              <!-- Dynamically populated ingredient input rows -->
+            </div>
+          </div>
+
+          <div>
+            <label class="block text-xs font-bold text-stone-600 mb-1">Instructions (optional)</label>
+            <textarea id="recipeInstructionsInput" rows="3" placeholder="Step 1: Boil water... Step 2: Sauté garlic..." class="w-full text-xs p-2.5 bg-stone-50 border-2 border-pantry-wood/40 rounded-xl focus:outline-none"></textarea>
+          </div>
+
+          <div class="pt-2 flex gap-2">
+            <button type="button" onclick="closeCustomRecipeModal()" class="flex-1 py-2.5 bg-stone-100 text-stone-700 font-display font-bold text-xs rounded-xl border-2 border-stone-300 pressable">
+              Cancel
+            </button>
+            <button type="submit" class="flex-1 py-2.5 bg-pantry-terracotta text-white font-display font-bold text-xs rounded-xl border-2 border-red-950 shadow-whimsy-sm pressable">
+              Save Recipe
+            </button>
+          </div>
+        </form>
+
+      </div>
+    </div>
+
+    <!-- 3.5 THEMEALDB RECIPE DISCOVERY MODAL (FREE PUBLIC API) -->
+    <div id="mealDbModal" class="fixed inset-0 z-50 bg-stone-900/60 backdrop-blur-sm flex items-center justify-center p-3 hidden">
+      <div class="bg-white border-4 border-pantry-woodDark rounded-3xl max-w-md w-full p-4 shadow-2xl space-y-3 max-h-[92vh] flex flex-col">
+        
+        <!-- Header -->
+        <div class="flex items-center justify-between border-b-2 border-stone-100 pb-2">
+          <div>
+            <h3 class="font-display font-bold text-base text-stone-800 flex items-center gap-1.5">
+              <span>🌐</span> TheMealDB Recipe Explorer
+            </h3>
+            <p class="text-[10px] text-stone-500 font-semibold">
+              Free, public culinary API • Zero API key required
+            </p>
+          </div>
+          <button onclick="closeMealDbModal()" class="w-7 h-7 rounded-full bg-stone-100 text-stone-500 flex items-center justify-center hover:bg-stone-200">
+            <i data-lucide="x" class="w-4 h-4"></i>
+          </button>
+        </div>
+
+        <!-- Search Bar & Auto-Import Trigger -->
+        <div class="space-y-2">
+          <div class="flex gap-1.5">
+            <div class="relative flex-1">
+              <input type="text" id="mealDbSearchInput" onkeydown="if(event.key==='Enter') searchMealDbApi()" placeholder="Search dishes (e.g. Chicken, Pasta, Curry, Cake)..." class="w-full text-xs font-bold py-2 pl-8 pr-3 bg-stone-50 border-2 border-pantry-wood/40 rounded-xl focus:outline-none focus:border-pantry-woodDark">
+              <i data-lucide="search" class="w-3.5 h-3.5 text-stone-400 absolute left-2.5 top-2.5"></i>
+            </div>
+            <button onclick="searchMealDbApi()" class="px-3 py-2 bg-pantry-wood text-white font-display font-bold text-xs rounded-xl border border-amber-950 pressable shadow-sm">
+              Search
+            </button>
+          </div>
+
+          <!-- Quick Category Filters -->
+          <div class="flex items-center gap-1 overflow-x-auto pb-1 no-scrollbar text-[11px] font-bold">
+            <button onclick="searchMealDbByCategory('Pasta')" class="px-2.5 py-1 rounded-lg bg-amber-50 border border-pantry-wood/40 text-stone-700 hover:bg-amber-100 whitespace-nowrap">
+              🍝 Pasta
+            </button>
+            <button onclick="searchMealDbByCategory('Chicken')" class="px-2.5 py-1 rounded-lg bg-amber-50 border border-pantry-wood/40 text-stone-700 hover:bg-amber-100 whitespace-nowrap">
+              🍗 Chicken
+            </button>
+            <button onclick="searchMealDbByCategory('Beef')" class="px-2.5 py-1 rounded-lg bg-amber-50 border border-pantry-wood/40 text-stone-700 hover:bg-amber-100 whitespace-nowrap">
+              🥩 Beef
+            </button>
+            <button onclick="searchMealDbByCategory('Breakfast')" class="px-2.5 py-1 rounded-lg bg-amber-50 border border-pantry-wood/40 text-stone-700 hover:bg-amber-100 whitespace-nowrap">
+              🥞 Breakfast
+            </button>
+            <button onclick="searchMealDbByCategory('Vegetarian')" class="px-2.5 py-1 rounded-lg bg-amber-50 border border-pantry-wood/40 text-stone-700 hover:bg-amber-100 whitespace-nowrap">
+              🥦 Veggie
+            </button>
+            <button onclick="searchMealDbByCategory('Dessert')" class="px-2.5 py-1 rounded-lg bg-amber-50 border border-pantry-wood/40 text-stone-700 hover:bg-amber-100 whitespace-nowrap">
+              🍰 Dessert
+            </button>
+          </div>
+
+          <!-- Quick 1-Click Batch Import -->
+          <div class="p-2.5 bg-amber-50/70 border border-pantry-wood/30 rounded-xl flex items-center justify-between gap-2">
+            <div>
+              <div class="font-display font-bold text-xs text-stone-800">Need a full starter cookbook?</div>
+              <div class="text-[10px] text-stone-500 font-semibold">1-click import 25+ classic comfort dishes</div>
+            </div>
+            <button onclick="batchImportCuratedMeals()" class="px-3 py-1.5 bg-pantry-sage text-white font-display font-bold text-xs rounded-xl border border-emerald-950 shadow-sm pressable flex items-center gap-1">
+              <span>📥</span>
+              <span>Import 25+</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Live Results Container -->
+        <div id="mealDbResultsContainer" class="flex-1 overflow-y-auto pr-1 space-y-2 text-xs">
+          <!-- Dynamically populated meal cards -->
+        </div>
+
+        <!-- Footer -->
+        <div class="pt-2 border-t border-stone-100 flex items-center justify-between">
+          <span class="text-[10px] text-stone-400 font-semibold">Powered by TheMealDB Free Open API</span>
+          <button onclick="closeMealDbModal()" class="py-1.5 px-4 bg-stone-100 text-stone-700 font-display font-bold text-xs rounded-xl border border-stone-300 pressable">
+            Close
+          </button>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- 4. RECEIPT SCAN AUDIT & BACKEND DIAGNOSTICS MODAL -->
+    <div id="scanAuditModal" class="fixed inset-0 z-50 bg-stone-900/60 backdrop-blur-sm flex items-center justify-center p-3 hidden">
+      <div class="bg-white border-4 border-pantry-woodDark rounded-3xl max-w-md w-full p-4 shadow-2xl space-y-3 max-h-[92vh] flex flex-col">
+        
+        <!-- Header -->
+        <div class="flex items-center justify-between border-b-2 border-stone-100 pb-2">
+          <div>
+            <h3 class="font-display font-bold text-base text-stone-800 flex items-center gap-1.5">
+              <span>🔍</span> Receipt Parser & Backend Log
+            </h3>
+            <p class="text-[10px] text-stone-500 font-semibold" id="auditModalSubtitle">
+              Logged to backend: <code class="bg-stone-100 px-1 py-0.5 rounded text-stone-700">logs/receipt-scans.log</code>
+            </p>
+          </div>
+          <button onclick="closeScanAuditModal()" class="w-7 h-7 rounded-full bg-stone-100 text-stone-500 flex items-center justify-center hover:bg-stone-200">
+            <i data-lucide="x" class="w-4 h-4"></i>
+          </button>
+        </div>
+
+        <!-- Audit Tabs -->
+        <div class="flex items-center gap-1 bg-amber-50 p-1 rounded-xl border border-pantry-wood/30 text-xs font-bold">
+          <button id="auditTabLineBtn" onclick="switchAuditTab('lines')" class="flex-1 py-1.5 rounded-lg bg-white border border-pantry-woodDark text-stone-800 shadow-sm text-center">
+            Line Breakdown
+          </button>
+          <button id="auditTabRawBtn" onclick="switchAuditTab('raw')" class="flex-1 py-1.5 rounded-lg text-stone-500 hover:text-stone-800 text-center">
+            Raw OCR Text
+          </button>
+          <button id="auditTabBackendBtn" onclick="switchAuditTab('backend')" class="flex-1 py-1.5 rounded-lg text-stone-500 hover:text-stone-800 text-center">
+            Backend File
+          </button>
+        </div>
+
+        <!-- Modal Body Content -->
+        <div class="flex-1 overflow-y-auto pr-1 space-y-2 text-xs">
+          
+          <!-- TAB 1: Line Audit -->
+          <div id="auditTabLinesContent" class="space-y-2">
+            <div class="bg-amber-50/60 p-2 rounded-xl text-[11px] text-stone-600 font-semibold border border-amber-200">
+              💡 <strong>Did OCR miss an item?</strong> Click <strong>"+ Add"</strong> next to any skipped line below to rescue it straight onto your shelves!
+            </div>
+            <div id="auditLinesList" class="space-y-1.5">
+              <!-- Dynamically populated line audits -->
+            </div>
+          </div>
+
+          <!-- TAB 2: Raw OCR Text -->
+          <div id="auditTabRawContent" class="hidden space-y-2">
+            <div class="flex items-center justify-between">
+              <span class="text-[11px] text-stone-500 font-semibold">Exact characters captured by scanner:</span>
+              <button onclick="copyRawOCRText()" class="px-2 py-0.5 bg-stone-100 border border-stone-300 rounded text-[10px] font-bold hover:bg-stone-200">
+                📋 Copy Raw Text
+              </button>
+            </div>
+            <textarea id="auditRawTextArea" readonly rows="12" class="w-full text-xs font-mono p-2.5 bg-stone-50 border-2 border-stone-200 rounded-xl focus:outline-none text-stone-800"></textarea>
+          </div>
+
+          <!-- TAB 3: Backend Log & Server Info -->
+          <div id="auditTabBackendContent" class="hidden space-y-2">
+            <div class="p-3 bg-stone-900 text-emerald-400 font-mono text-[11px] rounded-2xl space-y-1.5 overflow-x-auto shadow-inner">
+              <div class="text-amber-300 font-bold"># Backend Logging Configuration:</div>
+              <div>Log File: logs/receipt-scans.log</div>
+              <div>JSONL File: logs/receipt-scans.jsonl</div>
+              <div>Latest Scan: logs/latest-scan.json</div>
+              <div>API Endpoint: POST /api/scan-log</div>
+              <div>Console: Live formatted logs in PowerShell terminal</div>
+            </div>
+            <div class="text-stone-500 text-[11px] font-semibold">
+              <p>Every scan automatically appends full audit traces and raw image OCR text to your server log files for complete visibility.</p>
+            </div>
+            <button onclick="fetchLatestBackendLog()" class="w-full py-2 bg-pantry-wood text-white font-display font-bold text-xs rounded-xl border border-amber-950 pressable shadow-sm">
+              🔄 Fetch Latest Server Log Entry
+            </button>
+            <div id="backendLogResponseView" class="hidden p-2.5 bg-stone-100 rounded-xl font-mono text-[10px] text-stone-700 max-h-40 overflow-y-auto whitespace-pre-wrap"></div>
+          </div>
+
+        </div>
+
+        <!-- Footer -->
+        <div class="pt-2 border-t border-stone-100 flex justify-end">
+          <button onclick="closeScanAuditModal()" class="py-2 px-5 bg-pantry-wood text-white font-display font-bold text-xs rounded-xl border-2 border-amber-950 shadow-whimsy-sm pressable">
+            Done
+          </button>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- ============================================== -->
+    <!-- MODAL: LEARNED MEMORY BANK (SELF-LEARNING)    -->
+    <!-- ============================================== -->
+    <div id="learnedMemoryModal" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-fade-in">
+      <div class="bg-white border-3 border-pantry-woodDark rounded-3xl w-full max-w-lg p-5 shadow-2xl space-y-4 max-h-[88vh] flex flex-col">
+        
+        <div class="flex items-center justify-between border-b-2 border-stone-100 pb-3">
+          <div class="flex items-center gap-2">
+            <span class="text-2xl">🧠</span>
+            <div>
+              <h3 class="font-display font-bold text-lg text-stone-800">Personal Memory Bank</h3>
+              <p class="text-[11px] text-stone-500 font-semibold">
+                Store-specific terms your pantry has learned from your edits
+              </p>
+            </div>
+          </div>
+          <button onclick="closeLearnedMemoryModal()" class="text-stone-400 hover:text-stone-700 p-1">
+            <i data-lucide="x" class="w-5 h-5"></i>
+          </button>
+        </div>
+
+        <!-- Search & Stats Bar -->
+        <div class="flex items-center gap-2">
+          <div class="relative flex-1">
+            <input type="text" id="learnedMemorySearchInput" oninput="renderLearnedMemoryList()" placeholder="Search learned items (e.g. redbull, sen)..." class="w-full text-xs font-bold bg-stone-50 border-2 border-pantry-wood/40 rounded-xl py-1.5 pl-8 pr-3 focus:outline-none focus:border-pantry-woodDark">
+            <i data-lucide="search" class="w-3.5 h-3.5 text-stone-400 absolute left-2.5 top-2.5"></i>
+          </div>
+          <button onclick="clearAllLearnedMemory()" class="px-2.5 py-1.5 bg-rose-50 border border-rose-300 text-rose-700 text-[10px] font-bold rounded-xl hover:bg-rose-100 whitespace-nowrap pressable">
+            Clear All
+          </button>
+        </div>
+
+        <!-- Learned Items List -->
+        <div id="learnedMemoryList" class="flex-1 overflow-y-auto space-y-2 pr-1 max-h-72">
+          <!-- Dynamically populated rows -->
+        </div>
+
+        <!-- Footer -->
+        <div class="pt-2 border-t border-stone-100 flex items-center justify-between text-xs">
+          <span class="text-[11px] text-stone-400 font-semibold" id="learnedMemoryTotalFooter">0 items remembered</span>
+          <button onclick="closeLearnedMemoryModal()" class="py-2 px-5 bg-pantry-wood text-white font-display font-bold text-xs rounded-xl border-2 border-amber-950 shadow-whimsy-sm pressable">
+            Done
+          </button>
+        </div>
+
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Application Logic Script -->
+  <script src="app.js"></script>
+</body>
+</html>

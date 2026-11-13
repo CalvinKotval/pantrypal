@@ -1,0 +1,14 @@
+# Personal scan logs & private receipt data
+logs/*.log
+logs/*.jsonl
+logs/latest-scan.json
+
+# Keep logs directory and learned dictionary template
+!logs/learned-dictionary.json
+
+# OS & Editor artifacts
+Thumbs.db
+.DS_Store
+*.tmp
+.vscode/
+.idea/
